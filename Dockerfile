@@ -35,6 +35,10 @@ RUN pip install --no-cache-dir --break-system-packages faster-whisper
 # Browsers em /opt (fora de /home/kirocrew, que o volume ./data sobrepoe em runtime),
 # com PLAYWRIGHT_BROWSERS_PATH exportado para o runtime encontra-los.
 ENV PLAYWRIGHT_BROWSERS_PATH=/opt/ms-playwright
+# Chrome do Google usa SUID sandbox (chrome-sandbox root:root 4755), invalidado
+# pelo user-namespace por-container do runtime Kiro -> aborta. Desliga o sandbox
+# do browser (passa --no-sandbox). Trade-off: menos isolamento contra paginas hostis.
+ENV PLAYWRIGHT_MCP_SANDBOX=0
 RUN npm install -g @playwright/cli @playwright/test \
     && npx --yes playwright install --with-deps chromium chrome \
     && rm -rf /var/lib/apt/lists/*
