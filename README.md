@@ -41,6 +41,7 @@ make token
 | `make logs` | Logs em tempo real |
 | `make login` | Login do kiro-cli (device flow) |
 | `make token` | Gera token do dashboard (10 anos) |
+| `make gh-login` | Login do GitHub CLI (`gh`) dentro do container |
 
 ## Estrutura
 

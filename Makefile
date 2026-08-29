@@ -1,4 +1,4 @@
-.PHONY: up down restart build logs login token
+.PHONY: up down restart build logs login token gh-login
 
 up:
 	docker compose up -d
@@ -20,3 +20,6 @@ login:
 
 token:
 	docker exec kirocrew kirocrew token --ttl 87600h
+
+gh-login:
+	docker exec -it kirocrew gh auth login
