@@ -1,6 +1,6 @@
 # KiroCrew Docker
 
-Docker setup para rodar o [KiroCrew](https://github.com/kirodotdev/KiroCrew) headless com suporte a SSH (acesso ao GitHub) e sandbox via seccomp.
+Docker setup para rodar o [KiroCrew](https://github.com/kirodotdev/KiroCrew) headless com suporte a SSH (acesso ao GitHub), `gh` CLI, Docker CLI e sandbox via seccomp.
 
 ## Pré-requisitos
 
@@ -25,7 +25,10 @@ make build
 # 4. Login do kiro-cli
 make login
 
-# 5. Gerar token do dashboard
+# 5. Login do GitHub CLI (opcional)
+make gh-login
+
+# 6. Gerar token do dashboard
 make token
 # Abrir o link impresso em http://localhost:5476/?token=...
 ```
@@ -51,7 +54,7 @@ kirocrew-docker/
 ├── .env                    # Vars locais (gitignore)
 ├── .env.example            # Template de configuração
 ├── .gitignore
-├── Dockerfile              # Imagem base + openssh-client + git
+├── Dockerfile              # Imagem base + openssh-client + git + gh + docker CLI
 ├── docker-compose.yml
 ├── kirocrew-seccomp.json   # Seccomp profile para sandbox
 └── Makefile
@@ -63,6 +66,15 @@ kirocrew-docker/
 |------|-----------|------|
 | `./data` | `/home/kirocrew` | rw — estado persistente |
 | `KIROCREW_SSH` | `/home/kirocrew/.ssh` | ro — chave SSH |
+| `/var/run/docker.sock` | `/var/run/docker.sock` | rw — Docker do host |
+
+## Acesso ao Docker do host
+
+O container monta o socket `/var/run/docker.sock`, permitindo que o agente KiroCrew gerencie containers diretamente no host via `docker` CLI.
+
+> ⚠️ **Atenção:** montar o socket Docker equivale a acesso root no host. Use com consciência — qualquer agente rodando dentro do KiroCrew terá controle total sobre os containers do host.
+
+O `docker-ce-cli` é instalado na imagem e o usuário `kirocrew` é adicionado ao grupo com o GID do grupo `docker` do host (configurado no Dockerfile).
 
 ## Sandbox
 
