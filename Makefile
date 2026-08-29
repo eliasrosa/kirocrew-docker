@@ -1,4 +1,4 @@
-.PHONY: up down restart build logs login token gh-login
+.PHONY: up down restart build logs login logout token gh-login
 
 up:
 	docker compose up -d
@@ -17,6 +17,9 @@ logs:
 
 login:
 	docker exec -it kirocrew kiro-cli login --use-device-flow
+
+logout:
+	docker exec -it kirocrew kiro-cli logout
 
 token:
 	docker exec kirocrew kirocrew token --ttl 87600h
