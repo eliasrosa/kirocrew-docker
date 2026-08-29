@@ -10,5 +10,6 @@ services:
     volumes:
       - ./data:/home/kirocrew
       - ${KIROCREW_SSH}:/home/kirocrew/.ssh:ro
+      - /var/run/docker.sock:/var/run/docker.sock
     security_opt:
       - seccomp:./kirocrew-seccomp.json
