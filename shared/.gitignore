@@ -1,0 +1,6 @@
+# Pasta de compartilhamento host <-> container.
+# Ignora todo o conteúdo (pastas, symlinks, arquivos compartilhados pelo host),
+# mas mantém a pasta versionada e preserva este .gitignore e o README.
+*
+!.gitignore
+!README.md

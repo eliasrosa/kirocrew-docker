@@ -57,6 +57,7 @@ kirocrew-docker/
 ├── Dockerfile              # Imagem base + openssh-client + git + gh + docker CLI
 ├── docker-compose.yml
 ├── kirocrew-seccomp.json   # Seccomp profile para sandbox
+├── shared/                 # Compartilhamento host ↔ container (conteúdo no gitignore)
 └── Makefile
 ```
 
@@ -67,6 +68,7 @@ kirocrew-docker/
 | `./data` | `/home/kirocrew` | rw — estado persistente |
 | `KIROCREW_SSH` | `/home/kirocrew/.ssh` | ro — chave SSH |
 | `/var/run/docker.sock` | `/var/run/docker.sock` | rw — Docker do host |
+| `./shared` | `/home/kirocrew/shared` | rw — compartilhamento host ↔ container (veja `shared/README.md`) |
 
 ## Acesso ao Docker do host
 
