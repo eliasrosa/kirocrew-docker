@@ -1,0 +1,5 @@
+# Estado persistente do KiroCrew (credenciais, config, agents)
+data/
+
+# Variáveis de ambiente locais
+.env

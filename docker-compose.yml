@@ -1,0 +1,14 @@
+services:
+  kirocrew:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kirocrew
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5476:5476"
+    volumes:
+      - ./data:/home/kirocrew
+      - ${KIROCREW_SSH}:/home/kirocrew/.ssh:ro
+    security_opt:
+      - seccomp:./kirocrew-seccomp.json
