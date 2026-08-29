@@ -22,6 +22,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get update && apt-get install -y --no-install-recommends \
        gh \
        docker-ce-cli \
+       docker-compose-plugin \
+       build-essential \
+       cmake \
        ffmpeg \
        nodejs \
     && rm -rf /var/lib/apt/lists/* \

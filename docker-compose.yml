@@ -11,6 +11,10 @@ services:
       - ./data:/home/kirocrew
       - ${KIROCREW_SSH}:/home/kirocrew/.ssh:ro
       - /var/run/docker.sock:/var/run/docker.sock
+      # Pasta de compartilhamento host <-> container. Tudo que o host quiser
+      # expor ao agente (pastas, symlinks) vai em ./shared e aparece em
+      # /home/kirocrew/shared dentro do container.
+      - ./shared:/home/kirocrew/shared
       # Monta este proprio repo no dev/ do container, para que o clone de
       # dentro e o do host sejam o MESMO diretorio (evita clones divergentes).
       - ./:/home/kirocrew/.kiro/crew/workspace/dev/kirocrew-docker
