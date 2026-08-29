@@ -18,8 +18,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get update && apt-get install -y --no-install-recommends \
        gh \
        docker-ce-cli \
+       ffmpeg \
     && rm -rf /var/lib/apt/lists/* \
     && groupadd -g 986 docker-host 2>/dev/null || true \
     && usermod -aG docker-host kirocrew
 
+# Speech-to-text: faster-whisper (offline, CPU). ffmpeg vem do apt acima.
+RUN pip install --no-cache-dir --break-system-packages faster-whisper
+
 USER kirocrew
+
+# Atalho: /home/kirocrew/workspace -> caminho real do workspace do KiroCrew.
+# Obs: em runtime o volume ./data monta sobre /home/kirocrew; este symlink
+# so aparece se o volume nao tiver 'workspace' proprio (ex.: ./data limpo).
+RUN ln -sfn /home/kirocrew/.kiro/crew/workspace /home/kirocrew/workspace
