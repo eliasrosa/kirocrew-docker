@@ -15,8 +15,15 @@ services:
       # expor ao agente (pastas, symlinks) vai em ./shared e aparece em
       # /home/kirocrew/shared dentro do container.
       - ./shared:/home/kirocrew/shared
-      # Monta este proprio repo no dev/ do container, para que o clone de
-      # dentro e o do host sejam o MESMO diretorio (evita clones divergentes).
-      - ./:/home/kirocrew/.kiro/crew/workspace/dev/kirocrew-docker
+      # Diretorio de projetos do host, montado no MESMO caminho dentro do
+      # container (path-espelhado). Assim o agente edita os repos reais do host
+      # (sem duplicar em ./data) E consegue rodar 'docker compose' a partir
+      # deles: como o caminho e identico dos dois lados, os volumes relativos
+      # dos projetos (resolvidos pelo daemon no host) apontam para o lugar certo.
+      # Este proprio repo vive em <KIROCREW_DEV>/kirocrew-docker, entao tambem
+      # e coberto por este mount (clone de dentro e do host sao o MESMO
+      # diretorio, evitando clones divergentes). Definir KIROCREW_DEV no .env;
+      # vazio desativa o mount.
+      - ${KIROCREW_DEV:-/dev/null}:${KIROCREW_DEV:-/tmp/.kirocrew-nodev}
     security_opt:
       - seccomp:./kirocrew-seccomp.json
