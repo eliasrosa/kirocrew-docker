@@ -1,6 +1,17 @@
 # KiroCrew Docker
 
-Docker setup para rodar o [KiroCrew](https://github.com/kirodotdev/KiroCrew) headless com suporte a SSH (acesso ao GitHub), `gh` CLI, Docker CLI e sandbox via seccomp.
+Docker setup para rodar o [KiroCrew](https://github.com/kirodotdev/KiroCrew) headless
+com suporte a SSH (acesso ao GitHub), `gh` CLI, Docker CLI e sandbox via seccomp.
+
+A imagem também é um **ambiente de desenvolvimento completo** para o agente trabalhar
+diretamente nos projetos montados, incluindo:
+
+- **Node.js 24 + npm** (via NodeSource)
+- **Python 3.12** + `faster-whisper` (speech-to-text offline, CPU)
+- **Docker CLI + Docker Compose nativo** (`docker-compose-plugin`)
+- **Toolchain C/C++**: `build-essential` (gcc/g++/make) + `cmake`
+- **ffmpeg** (via apt)
+- **Playwright** (`@playwright/cli` + `@playwright/test`) com Chromium/Chrome
 
 ## Pré-requisitos
 
@@ -43,6 +54,7 @@ make token
 | `make build` | Rebuild da imagem + sobe |
 | `make logs` | Logs em tempo real |
 | `make login` | Login do kiro-cli (device flow) |
+| `make logout` | Logout do kiro-cli |
 | `make token` | Gera token do dashboard (10 anos) |
 | `make gh-login` | Login do GitHub CLI (`gh`) dentro do container |
 
@@ -54,7 +66,7 @@ kirocrew-docker/
 ├── .env                    # Vars locais (gitignore)
 ├── .env.example            # Template de configuração
 ├── .gitignore
-├── Dockerfile              # Imagem base + openssh-client + git + gh + docker CLI
+├── Dockerfile              # Imagem base + dev-env (Node 24, Python 3.12, Docker CLI+compose, toolchain C/C++, ffmpeg, Playwright)
 ├── docker-compose.yml
 ├── kirocrew-seccomp.json   # Seccomp profile para sandbox
 ├── shared/                 # Compartilhamento host ↔ container (conteúdo no gitignore)
