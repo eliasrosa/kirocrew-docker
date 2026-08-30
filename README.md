@@ -69,6 +69,7 @@ kirocrew-docker/
 | `KIROCREW_SSH` | `/home/kirocrew/.ssh` | ro — chave SSH |
 | `/var/run/docker.sock` | `/var/run/docker.sock` | rw — Docker do host |
 | `./shared` | `/home/kirocrew/shared` | rw — compartilhamento host ↔ container (veja `shared/README.md`) |
+| `KIROCREW_DEV` | `KIROCREW_DEV` (mesmo caminho) | rw — diretório de projetos do host, path-espelhado (opcional; vazio desativa) |
 
 ## Acesso ao Docker do host
 
