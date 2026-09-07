@@ -25,5 +25,16 @@ services:
       # diretorio, evitando clones divergentes). Definir KIROCREW_DEV no .env;
       # vazio desativa o mount.
       - ${KIROCREW_DEV:-/dev/null}:${KIROCREW_DEV:-/tmp/.kirocrew-nodev}
-    security_opt:
-      - seccomp:./kirocrew-seccomp.json
+    # privileged: true — necessário para o sandbox interno do kiro-cli 2.21+.
+    # O kiro-cli usa Linux user namespaces para isolar subprocessos do agente.
+    # Dentro de containers Docker o rootfs é montado com propagação 'shared',
+    # e o kernel bloqueia mount --make-rprivate dentro de user namespaces filhos
+    # mesmo com CAP_SYS_ADMIN. privileged: true é a única solução sem patches
+    # no runtime/kernel. Consequências: seccomp e AppArmor do Docker são
+    # desabilitados, mas o isolamento de filesystem/rede/PID permanece.
+    # Veja docs/privileged.md para análise completa de riscos.
+    privileged: true
+    # seccomp customizado fica aqui para documentação, mas é ignorado pelo
+    # Docker quando privileged: true está ativo.
+    # security_opt:
+    #   - seccomp:./kirocrew-seccomp.json
