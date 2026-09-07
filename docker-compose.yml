@@ -38,3 +38,9 @@ services:
     # Docker quando privileged: true está ativo.
     # security_opt:
     #   - seccomp:./kirocrew-seccomp.json
+    # Credenciais: o entrypoint move cada variável definida para
+    # ./data/.kiro/crew/.env (chmod 600) e a remove do environ do processo,
+    # garantindo que não fique exposta em /proc/<pid>/environ.
+    environment:
+      - KIRO_API_KEY=${KIRO_API_KEY:-}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
