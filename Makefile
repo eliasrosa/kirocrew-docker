@@ -18,10 +18,14 @@ down: ## Para e remove o container
 restart: ## Reinicia o container
 	docker compose down && docker compose up -d
 
-relogin: ## Reinicia o container e refaz o login (restart + logout + login)
+relogin: ## Reinicia o container; refaz login só se necessário (token persiste entre restarts)
 	docker compose down && docker compose up -d
-	docker exec -it kirocrew kiro-cli logout 2>/dev/null || true
-	docker exec -it kirocrew kiro-cli login --use-device-flow
+	@if docker exec kirocrew kiro-cli whoami >/dev/null 2>&1; then \
+	  echo "==> kiro-cli já autenticado (token persistido em ./data). Login não necessário."; \
+	else \
+	  echo "==> Token ausente ou expirado — iniciando login..."; \
+	  docker exec -it kirocrew kiro-cli login --use-device-flow; \
+	fi
 
 build: ## Rebuild da imagem + sobe
 	docker compose build && docker compose up -d

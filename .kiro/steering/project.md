@@ -13,6 +13,19 @@ host aqui — usar variáveis de ambiente e exemplos genéricos.
 O `README.md` cobre setup e comandos para o **usuário**. Este arquivo cobre os
 gotchas para o **agente** que roda dentro do container.
 
+## Contexto de execução do agente
+
+O agente que edita **este repo** roda na **IDE do host** (Kiro IDE), não dentro
+do container kirocrew. Consequências:
+
+- Pode rodar `make restart`, `make relogin`, `make down`, `make build` etc.
+  sem risco de se desconectar — esses comandos afetam o container kirocrew,
+  não o processo do agente.
+- O container kirocrew é um **serviço separado** gerenciado pelo agente via
+  Docker CLI do host.
+- Só proibir esses comandos se o agente estiver explicitamente rodando
+  **dentro** do container (ex: sessão KiroCrew headless via Telegram/dashboard).
+
 ## O agente RODA dentro do container que este repo define
 
 Consequências diretas:
@@ -53,6 +66,74 @@ Caminhos pessoais entram por **variável no `.env`** (gitignored), com exemplo
 genérico `/home/YOUR_USER/...` no `.env.example` (versionado). Padrão já usado
 por `KIROCREW_SSH` e `KIROCREW_DEV`. Fallback `${VAR:-/dev/null}` desativa um
 mount opcional quando a variável não está definida.
+
+## Diagnóstico antes de tentar fix de container
+
+Antes de qualquer tentativa de fix envolvendo kernel, namespaces, capabilities
+ou mounts dentro de um container, **testar primeiro com `docker run --rm`**
+descartável:
+
+```bash
+docker run --rm \
+  --security-opt seccomp:./kirocrew-seccomp.json \
+  --cap-add SYS_ADMIN \
+  --entrypoint /bin/sh \
+  ghcr.io/kirodotdev/kirocrew:stable \
+  -c "<comando a testar>"
+```
+
+Isso evita ciclos de `make restart` com configs quebradas. A regra:
+- 1ª tentativa falhou → testar hipótese com `docker run --rm` antes de editar
+  o compose e reiniciar.
+- Nunca fazer 3+ iterações de restart sem validar a hipótese de forma isolada.
+
+Antes de sobrescrever `entrypoint` no compose, **sempre ler o script original**:
+
+```bash
+docker run --rm --entrypoint="" ghcr.io/kirodotdev/kirocrew:stable \
+  cat $(docker run --rm --entrypoint="" ghcr.io/kirodotdev/kirocrew:stable which kirocrew-entrypoint)
+```
+
+Ou mais simples:
+
+```bash
+docker run --rm --entrypoint="" ghcr.io/kirodotdev/kirocrew:stable \
+  cat /usr/local/bin/kirocrew-entrypoint
+```
+
+O entrypoint original faz scrub de credenciais, probe de sandbox e chama `tini`.
+Sobrescrever sem ler quebra o container silenciosamente (`init process is not running`).
+
+## Persistência do login
+
+O token de autenticação do kiro-cli é salvo em:
+```
+./data/.local/share/kiro-cli/data.sqlite3  (tabela auth_kv, key: kirocli:social:token)
+```
+
+Como `./data` é o volume persistente montado em `/home/kirocrew`, o **login
+persiste entre restarts** — não é necessário refazer o login a cada `make restart`.
+
+O `make relogin` verifica automaticamente via `kiro-cli whoami` antes de pedir
+login. Só inicia o device flow se o token estiver ausente ou expirado.
+
+O que causa `"not logged in"` nos logs **não é perda de token**, mas race
+condition no boot: o gateway tenta spawnar o kiro-cli imediatamente ao subir, e
+se o processo ainda não estiver pronto retorna rc=1 e entra em cooldown de 1800s.
+Solução: após o boot, aguardar ~10s antes de fazer qualquer chamada, ou usar
+`make relogin` que já lida com isso.
+
+## Fluxo após update ou restart
+
+O token persiste — `make relogin` verifica antes de pedir novo login. Usar sempre
+`make relogin` ao invés de `docker restart kirocrew`:
+
+```bash
+make relogin   # restart + verifica login (só pede device flow se necessário)
+```
+
+Nunca usar `docker restart kirocrew` isolado — reinicia sem verificar o login e
+pode deixar o gateway em cooldown de 1800s se houver race condition no boot.
 
 ## Fluxo de mudança neste repo
 
