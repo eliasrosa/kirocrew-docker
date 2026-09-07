@@ -31,8 +31,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && groupadd -g 986 docker-host 2>/dev/null || true \
     && usermod -aG docker-host kirocrew
 
-# Speech-to-text: faster-whisper (offline, CPU). ffmpeg vem do apt acima.
-RUN pip install --no-cache-dir --break-system-packages faster-whisper
+# Speech-to-text: extra de voz do KiroCrew (whisper.cpp in-process + AWS Transcribe).
+# O 0.5 reempacotou o STT como extra opcional 'kirocrew[voice]'; faster-whisper
+# avulso nao e mais o engine. ffmpeg vem do apt acima.
+RUN pip install --no-cache-dir --break-system-packages 'kirocrew[voice]'
 
 # Playwright: CLI (browser automation do KiroCrew) + framework de teste E2E.
 # Browsers em /opt (fora de /home/kirocrew, que o volume ./data sobrepoe em runtime),
