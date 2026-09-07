@@ -51,6 +51,7 @@ make token
 | `make up` | Sobe o container |
 | `make down` | Para e remove |
 | `make restart` | Reinicia |
+| `make relogin` | Reinicia + logout + login (útil após update de imagem) |
 | `make build` | Rebuild da imagem + sobe |
 | `make check` | Verifica se há release nova do Kiro Crew (compara digest do `stable` remoto x base local; não baixa nada) |
 | `make update` | Baixa o `stable` novo, rebuilda e sobe (estado persiste no volume `./data`) |
@@ -99,7 +100,11 @@ O `docker-ce-cli` é instalado na imagem e o usuário `kirocrew` é adicionado a
 
 ## Sandbox
 
-O setup usa o [seccomp profile oficial](https://github.com/kirodotdev/KiroCrew/blob/main/docker/seccomp/kirocrew-seccomp.json) do KiroCrew, que habilita o sandbox de namespace sem precisar de `--privileged`.
+O kiro-cli 2.21+ usa um sandbox interno baseado em Linux user namespaces (`unshare(CLONE_NEWUSER+NEWNS)` + `mount --make-rprivate /`). Dentro de containers Docker, essa operação falha com EPERM porque o rootfs é montado com propagação `shared` pelo daemon e o kernel bloqueia a mudança mesmo com `CAP_SYS_ADMIN`.
+
+**Solução adotada:** `privileged: true` no compose. É necessário para que os processos filhos (agente, file-explorer, md-notebook) consigam manipular a propagação dos mounts herdados. O `seccomp` nativo do Docker é desabilitado por `--privileged`, mas o isolamento do container (filesystem, rede, PID namespace) permanece intacto.
+
+> ⚠️ `privileged: true` concede acesso irrestrito ao kernel do host dentro do container. Combine com o socket Docker já montado — o nível de confiança necessário aqui é o mesmo de root no host. Veja [docs/privileged.md](docs/privileged.md) para análise completa de riscos e alternativas exploradas.
 
 ## Atualizar
 

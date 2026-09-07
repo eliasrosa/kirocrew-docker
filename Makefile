@@ -1,4 +1,4 @@
-.PHONY: help up down restart build logs login logout token gh-login check update
+.PHONY: help up down restart relogin build logs login logout token gh-login check update
 .DEFAULT_GOAL := help
 
 # Imagem base oficial que o Dockerfile estende (FROM ghcr.io/kirodotdev/kirocrew:stable)
@@ -17,6 +17,11 @@ down: ## Para e remove o container
 
 restart: ## Reinicia o container
 	docker compose down && docker compose up -d
+
+relogin: ## Reinicia o container e refaz o login (restart + logout + login)
+	docker compose down && docker compose up -d
+	docker exec -it kirocrew kiro-cli logout 2>/dev/null || true
+	docker exec -it kirocrew kiro-cli login --use-device-flow
 
 build: ## Rebuild da imagem + sobe
 	docker compose build && docker compose up -d

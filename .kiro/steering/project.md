@@ -17,12 +17,12 @@ gotchas para o **agente** que roda dentro do container.
 
 Consequências diretas:
 
-- **`make down` / `make restart` NÃO podem ser rodados pelo agente.** `make down`
-  é `docker compose down`, que para e remove o container `kirocrew` — onde o
-  agente executa. Ele se desconecta no meio e o `up` pode nem rodar (o processo
-  que disparou morreu junto). Qualquer reinício para pegar volume/imagem novos é
-  do **usuário, no host**. O agente prepara as mudanças e mostra os diffs; o
-  usuário builda/reinicia.
+- **`make down` / `make restart` / `make relogin` NÃO podem ser rodados pelo agente
+  quando ele está rodando DENTRO do container `kirocrew`.** `make down` para e
+  remove o container — o agente se desconecta no meio. Qualquer reinício é do
+  **usuário, no host**.
+- **Exceção:** quando o agente roda na IDE do host (ex: Kiro IDE), pode rodar
+  `make restart` e `make relogin` normalmente — ele não está no container.
 - **`./data` é montado em `/home/kirocrew`** (o home inteiro do agente, estado
   persistente: sessões, memória, config). Mover ou mexer no `data/` com o
   container de pé arrisca o vínculo desse estado — só com o container parado.
@@ -70,6 +70,26 @@ usuário). Push direto na `main` é bloqueado — usar feature branch + PR + mer
 
 ## Sandbox
 
-Seccomp profile habilita o sandbox de namespace sem `--privileged`. Em alguns
-hosts o `unshare(CLONE_NEWUSER)` é negado (EPERM) e os subprocessos rodam
-UNCONFINED — questão de kernel/seccomp do host, não deste compose.
+O kiro-cli 2.21+ usa sandbox interno baseado em Linux user namespaces
+(`unshare(CLONE_NEWUSER+NEWNS)` + `mount --make-rprivate /`). Dentro de
+containers Docker o rootfs é montado com propagação `shared` pelo daemon — o
+kernel bloqueia `mount --make-rprivate` dentro de user namespaces filhos mesmo
+com `CAP_SYS_ADMIN`, porque os mounts foram criados fora daquele user namespace.
+
+**Solução adotada: `privileged: true` no compose.** É a única forma de garantir
+que os processos filhos (agente, apps file-explorer/md-notebook) consigam
+manipular a propagação. O `seccomp` e `AppArmor` nativos do Docker são
+desabilitados por `--privileged`, mas o isolamento de filesystem/rede/PID
+permanece.
+
+Diagnóstico rápido de sandbox:
+```bash
+docker exec kirocrew python3 -c "from kiro_crew.sandbox import detect_backend; print(detect_backend())"
+# deve retornar "namespace" — se retornar "none", o sandbox está desabilitado
+```
+
+Após update de imagem que quebre o sandbox: rodar `make relogin` (restart + re-auth).
+O erro típico nos logs é:
+```
+sandbox: BLOCKED -- making mount propagation private on / failed: errno 13
+```
