@@ -51,7 +51,7 @@ make token
 | `make up` | Sobe o container |
 | `make down` | Para e remove |
 | `make restart` | Reinicia |
-| `make relogin` | Reinicia + logout + login (útil após update de imagem) |
+| `make relogin` | Reinicia; refaz login só se token ausente/expirado (token persiste entre restarts) |
 | `make build` | Rebuild da imagem + sobe |
 | `make check` | Verifica se há release nova do Kiro Crew (compara digest do `stable` remoto x base local; não baixa nada) |
 | `make update` | Baixa o `stable` novo, rebuilda e sobe (estado persiste no volume `./data`) |
