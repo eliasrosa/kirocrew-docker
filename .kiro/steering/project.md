@@ -117,6 +117,14 @@ persiste entre restarts** — não é necessário refazer o login a cada `make r
 O `make relogin` verifica automaticamente via `kiro-cli whoami` antes de pedir
 login. Só inicia o device flow se o token estiver ausente ou expirado.
 
+**Sessão OAuth expirada** — `kiro-cli whoami` retorna "Logged in" mas o agente
+recebe `"Your session has expired. Run kiro-cli login"`. Isso acontece quando o
+token OAuth do lado da AWS/Kiro expira (independe de restart ou build), então o
+`whoami` sozinho NÃO detecta. Solução:
+```bash
+make logout && make login
+```
+
 O que causa `"not logged in"` nos logs **não é perda de token**, mas race
 condition no boot: o gateway tenta spawnar o kiro-cli imediatamente ao subir, e
 se o processo ainda não estiver pronto retorna rc=1 e entra em cooldown de 1800s.
