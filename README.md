@@ -52,11 +52,17 @@ make token
 | `make down` | Para e remove |
 | `make restart` | Reinicia |
 | `make build` | Rebuild da imagem + sobe |
+| `make check` | Verifica se há release nova do Kiro Crew (compara digest do `stable` remoto x base local; não baixa nada) |
+| `make update` | Baixa o `stable` novo, rebuilda e sobe (estado persiste no volume `./data`) |
 | `make logs` | Logs em tempo real |
 | `make login` | Login do kiro-cli (device flow) |
 | `make logout` | Logout do kiro-cli |
 | `make token` | Gera token do dashboard (10 anos) |
 | `make gh-login` | Login do GitHub CLI (`gh`) dentro do container |
+
+> **Verificação automática:** um cron de script (zero-token) roda o equivalente ao
+> `make check` diariamente e só avisa quando há release nova — aí é só rodar
+> `make update`. Atualizar reinicia o próprio agente.
 
 ## Estrutura
 
